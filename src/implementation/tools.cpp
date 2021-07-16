@@ -1,6 +1,6 @@
 #include "tools.h"
 
-float sense(zer::row<float>& fPhemap, float fY, float fX, float fAngle, float fSensorAngleOffset, float fSensorLength, float fSensorDistance)
+float sense(std::vector<float>& phemap, float fY, float fX, float fAngle, float fSensorAngleOffset, float fSensorLength, float fSensorDistance)
 {
 	float fSensorAngle = fAngle + fSensorAngleOffset;
 	float fSummaryWeight = 0;
@@ -11,26 +11,26 @@ float sense(zer::row<float>& fPhemap, float fY, float fX, float fAngle, float fS
 		int iTempX = fX + cos(fSensorAngle) * (i + 1 + fSensorDistance);
 
 		if (zer::athm::pointInside2dMatrix(mWH, mWW, iTempY, iTempX))
-			fSummaryWeight += fPhemap[mWW * iTempY + iTempX];
+			fSummaryWeight += phemap[mWW * iTempY + iTempX];
 	}
 
 	return fSummaryWeight;
 }
 
-void setPixelToPixmap(zer::row<uint8_t>& ui8Pixmap, int iIndex, sf::Color& cColor)
+void setPixelToPixmap(std::vector<uint8_t>& pixmap, int iIndex, sf::Color& cColor)
 {
-	ui8Pixmap[iIndex * 4 + 0] = cColor.r;
-	ui8Pixmap[iIndex * 4 + 1] = cColor.g;
-	ui8Pixmap[iIndex * 4 + 2] = cColor.b;
-	ui8Pixmap[iIndex * 4 + 3] = cColor.a;
+	pixmap[iIndex * 4 + 0] = cColor.r;
+	pixmap[iIndex * 4 + 1] = cColor.g;
+	pixmap[iIndex * 4 + 2] = cColor.b;
+	pixmap[iIndex * 4 + 3] = cColor.a;
 }
 
-void setPixelToPixmap(zer::row<uint8_t>& ui8Pixmap, int iIndex, sf::Color&& cColor)
+void setPixelToPixmap(std::vector<uint8_t>& pixmap, int iIndex, sf::Color&& cColor)
 {
-	setPixelToPixmap(ui8Pixmap, iIndex, cColor);
+	setPixelToPixmap(pixmap, iIndex, cColor);
 }
 
-void displayConsoleInformation(zer::dict<std::string, float>& dCfg, bool bSimulationStarted)
+void displayConsoleInformation(std::map<std::string, float>& cfg, bool bSimulationStarted)
 {
 	system("cls");
 
@@ -42,13 +42,14 @@ void displayConsoleInformation(zer::dict<std::string, float>& dCfg, bool bSimula
 	std::cout << "\t [ R ] - restart simulation;" << std::endl;
 	std::cout << "\n[!] note: visit a \"" << msConfigPath << "\" file to change simulation configuration;" << std::endl;
 	std::cout << "\n[!] current configuration:" << std::endl;
-	for (int i = 0; i < dCfg.len(); ++i)
-		std::cout << "\t" << dCfg.key(i) << " = " << dCfg[dCfg.key(i)] << ";" << std::endl;
+	
+	for (std::map<std::string, float>::iterator p = cfg.begin(); p != cfg.end(); p++)
+		std::cout << "\t" << p -> first << " = " << p -> second << ";" << std::endl;
 }
 
-zer::dict<std::string, float> readConfig(std::string sConfigPath)
+std::map<std::string, float> readConfig(std::string sConfigPath)
 {
-	zer::dict<std::string, float> d;
+	std::map<std::string, float> cfg;
 
 	zer::File file(sConfigPath);
 	file.read({zer::file::Modifier::lines});
@@ -56,14 +57,14 @@ zer::dict<std::string, float> readConfig(std::string sConfigPath)
 	for (int i = 0; i < file.linesLen(); ++i)
 	{
 		std::string sLine = file.line(i);
-		if (zer::str::have(sLine, " = "))
+		if (sLine.find(" = ") != std::string::npos)
 		{
-			zer::row<string> lineParts = zer::str::split(sLine, " = ");
-			d.add(lineParts[0], stof(lineParts[1]));
+			std::vector<string> lineParts = zer::athm::split(sLine, " = ");
+			cfg[lineParts[0]] = stof(lineParts[1]);
 		}
 	}
 
-	return d;
+	return cfg;
 }
 
 EVENT_CODE eventListener(sf::RenderWindow& window)

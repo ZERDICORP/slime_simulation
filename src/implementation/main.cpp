@@ -2,28 +2,28 @@
 #include "tools.h"
 #include "agent.h"
 
-int loop(sf::RenderWindow& window, zer::dict<std::string, float>& dCfg)
+int loop(sf::RenderWindow& window, std::map<std::string, float>& cfg)
 {
 	bool bSimulationStarted = false;
 	bool bNeedToUpdateConsole = true;
 
-	float fPheromoneDisappearanceRate = dCfg["pheromoneDisappearanceRate"];
-	float fPheromoneConcentration = dCfg["pheromoneConcentration"];
-	float fSensorLength = dCfg["sensorLength"];
-	float fSensorDistance = dCfg["sensorDistance"];
-	float fSensorAngleOffset = zer::athm::toRadians(dCfg["sensorAngleOffset"]);
-	float fItemTurnSpeed = dCfg["itemTurnSpeed"];
-	float fItemSpeed = dCfg["itemSpeed"];
+	float fPheromoneDisappearanceRate = cfg["pheromoneDisappearanceRate"];
+	float fPheromoneConcentration = cfg["pheromoneConcentration"];
+	float fSensorLength = cfg["sensorLength"];
+	float fSensorDistance = cfg["sensorDistance"];
+	float fSensorAngleOffset = zer::athm::toRadians(cfg["sensorAngleOffset"]);
+	float fItemTurnSpeed = cfg["itemTurnSpeed"];
+	float fItemSpeed = cfg["itemSpeed"];
 
-	zer::row<uint8_t> ui8Pixmap(mWH * mWW * 4);
+	std::vector<uint8_t> pixmap(mWH * mWW * 4);
 	for (int i = 0; i < mWH * mWW; ++i)
-		setPixelToPixmap(ui8Pixmap, i, sf::Color(0, 0, 0));
+		setPixelToPixmap(pixmap, i, sf::Color(0, 0, 0));
 
-	zer::row<float> fPhemap(mWH * mWW, 0);
+	std::vector<float> phemap(mWH * mWW, 0);
 
-	zer::row<Agent> agents;
+	std::vector<Agent> agents;
 	
-	int iRows = sqrt(dCfg["itemsQuantity"]);
+	int iRows = sqrt(cfg["itemsQuantity"]);
 	int iCols = iRows;
 	int iSqW = ceil((float)mWW / iCols);
 
@@ -38,8 +38,8 @@ int loop(sf::RenderWindow& window, zer::dict<std::string, float>& dCfg)
 			if (x >= mWW)
 				x = x - mWW;
 			
-			agents.end(Agent(y, x, zer::athm::getAngleToPoint(y, x, mWH / 2, mWW / 2)));
-			setPixelToPixmap(ui8Pixmap, mWW * y + x, sf::Color(255, 255, 255));
+			agents.push_back(Agent(y, x, zer::athm::getAngleToPoint(y, x, mWH / 2, mWW / 2)));
+			setPixelToPixmap(pixmap, mWW * y + x, sf::Color(255, 255, 255));
 		}
 
 	sf::Texture texture;
@@ -48,9 +48,9 @@ int loop(sf::RenderWindow& window, zer::dict<std::string, float>& dCfg)
 	/*
 		Just to make the code more readable and simpler.
 	*/
-	auto senseWrapper = [&fPhemap, &fSensorLength, &fSensorDistance](Agent& agent, float fSensorAngleOffset) -> float
+	auto senseWrapper = [&phemap, &fSensorLength, &fSensorDistance](Agent& agent, float fSensorAngleOffset) -> float
 	{
-		return sense(fPhemap, agent.fY, agent.fX, agent.fAngle, fSensorAngleOffset, fSensorLength, fSensorDistance);
+		return sense(phemap, agent.fY, agent.fX, agent.fAngle, fSensorAngleOffset, fSensorLength, fSensorDistance);
 	};
 
 	while (window.isOpen())
@@ -60,33 +60,33 @@ int loop(sf::RenderWindow& window, zer::dict<std::string, float>& dCfg)
 		if (bSimulationStarted)
 		{
 			for (int i = 0; i < mWH * mWW; ++i)
-				setPixelToPixmap(ui8Pixmap, i, sf::Color(0, 0, 0));
+				setPixelToPixmap(pixmap, i, sf::Color(0, 0, 0));
 
 			/*
 				Drawing a pheromone map.
 			*/
 			for (int i = 0; i < mWH * mWW; ++i)
 			{
-				if (fPhemap[i])
+				if (phemap[i])
 				{
-					fPhemap[i] *= (1 - fPheromoneDisappearanceRate);
-					if (fPhemap[i] < 1)
-						fPhemap[i] = 0;
+					phemap[i] *= (1 - fPheromoneDisappearanceRate);
+					if (phemap[i] < 1)
+						phemap[i] = 0;
 
-					int iColorValue = fPhemap[i];
+					int iColorValue = phemap[i];
 					if (iColorValue > 255)
 						iColorValue = 255;
 
-					setPixelToPixmap(ui8Pixmap, i, sf::Color(iColorValue, iColorValue, iColorValue));
+					setPixelToPixmap(pixmap, i, sf::Color(iColorValue, iColorValue, iColorValue));
 				}
 			}
 
 			/*
 				Agents movement logic.
 			*/
-			for (int i = 0; i < agents.len(); ++i)
+			for (int i = 0; i < agents.size(); ++i)
 			{
-				fPhemap[mWW * (int)agents[i].fY + (int)agents[i].fX] += fPheromoneConcentration;
+				phemap[mWW * (int)agents[i].fY + (int)agents[i].fX] += fPheromoneConcentration;
 
 				float fWeightForward = senseWrapper(agents[i], 0);
 				float fWeightLeft = senseWrapper(agents[i], fSensorAngleOffset);
@@ -117,14 +117,14 @@ int loop(sf::RenderWindow& window, zer::dict<std::string, float>& dCfg)
 			}
 		}
 
-		texture.update(ui8Pixmap.start());
+		texture.update(&pixmap[0]);
 		window.draw(sf::Sprite(texture));
 
 		window.display();
 
 		if (bNeedToUpdateConsole)
 		{
-			displayConsoleInformation(dCfg, bSimulationStarted);
+			displayConsoleInformation(cfg, bSimulationStarted);
 			bNeedToUpdateConsole = false;
 		}
 
@@ -152,7 +152,7 @@ int init(sf::RenderWindow& window)
 {
 	zer::rnd::init();
 
-	zer::dict<std::string, float> dCfg = readConfig(msConfigPath);
+	std::map<std::string, float> cfg = readConfig(msConfigPath);
 	
-	return loop(window, dCfg);
+	return loop(window, cfg);
 }

@@ -10,7 +10,7 @@ float sense(std::vector<float>& phemap, float fY, float fX, float fAngle, float 
 		int iTempY = fY + sin(fSensorAngle) * (i + 1 + fSensorDistance);
 		int iTempX = fX + cos(fSensorAngle) * (i + 1 + fSensorDistance);
 
-		if (zer::athm::pointInside2dMatrix(mWH, mWW, iTempY, iTempX))
+		if (zer::athm::inRange2D(mWH, mWW, iTempY, iTempX))
 			fSummaryWeight += phemap[mWW * iTempY + iTempX];
 	}
 
@@ -56,10 +56,10 @@ std::map<std::string, float> readConfig(std::string sConfigPath)
 
 	for (int i = 0; i < file.linesLen(); ++i)
 	{
-		std::string sLine = file.line(i);
+		std::string sLine = file.lineAt(i);
 		if (sLine.find(" = ") != std::string::npos)
 		{
-			std::vector<string> lineParts = zer::athm::split(sLine, " = ");
+			std::vector<std::string> lineParts = zer::athm::split(sLine, " = ");
 			cfg[lineParts[0]] = stof(lineParts[1]);
 		}
 	}

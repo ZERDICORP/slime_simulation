@@ -91,7 +91,7 @@ int loop(sf::RenderWindow& window, std::map<std::string, float>& cfg)
 				float fWeightForward = senseWrapper(agents[i], 0);
 				float fWeightLeft = senseWrapper(agents[i], fSensorAngleOffset);
 				float fWeightRight = senseWrapper(agents[i], -fSensorAngleOffset);
-				float fRandomAmplifier = zer::rnd::randf();
+				float fRandomAmplifier = zer::athm::rand_float();
 
 				if (fWeightForward > fWeightLeft && fWeightForward > fWeightRight)
 					agents[i].fAngle += 0;
@@ -102,12 +102,12 @@ int loop(sf::RenderWindow& window, std::map<std::string, float>& cfg)
 				else if (fWeightRight > fWeightLeft)
 					agents[i].fAngle -= fRandomAmplifier * fItemTurnSpeed;
 				else
-					agents[i].fAngle += zer::athm::toRadians(zer::rnd::randi(-10, 10));
+					agents[i].fAngle += zer::athm::toRadians(zer::athm::rand_int(-10, 10));
 
 				float fNextAgentY = agents[i].fY + sin(agents[i].fAngle) * fItemSpeed;
 				float fNextAgentX = agents[i].fX + cos(agents[i].fAngle) * fItemSpeed;
 				
-				if (zer::athm::pointInside2dMatrix(mWH, mWW, fNextAgentY, fNextAgentX))
+				if (zer::athm::inRange2D(mWH, mWW, fNextAgentY, fNextAgentX))
 				{
 					agents[i].fY = fNextAgentY;
 					agents[i].fX = fNextAgentX;
@@ -150,7 +150,7 @@ int loop(sf::RenderWindow& window, std::map<std::string, float>& cfg)
 
 int init(sf::RenderWindow& window)
 {
-	zer::rnd::init();
+	zer::athm::rand_init();
 
 	std::map<std::string, float> cfg = readConfig(msConfigPath);
 	

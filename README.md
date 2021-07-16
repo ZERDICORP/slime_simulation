@@ -11,3 +11,9 @@
 ### Step 3:
 
 **> Run "run.bat".**
+
+#### Author's libraries used by this program:
+
+**[file.h](https://github.com/ZERDICORP/file-lib.git)**
+**[athm.h](https://github.com/ZERDICORP/athm-lib.git)**
+**[random.h](https://github.com/ZERDICORP/random-lib.git)** 

@@ -8,3 +8,5 @@
 ### Author's libraries used by this project:
 - [file.h](https://github.com/ZERDICORP/file-lib.git)
 - [athm.h](https://github.com/ZERDICORP/athm-lib.git)
+
+![screenshot](https://github.com/ZERDICORP/slime_simulation/blob/master/screenshots/s1.png?row=true)

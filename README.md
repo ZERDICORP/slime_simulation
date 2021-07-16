@@ -1,6 +1,6 @@
 # Slime Simulation
 
-<img src="https://github.com/ZERDICORP/slime_simulation/blob/master/screenshots/s1.png?row=true" width="250" height="250">
+<img src="https://github.com/ZERDICORP/slime_simulation/blob/master/screenshots/s1.png?row=true" alt="screenshot" width="250" height="250" style="border-radius: 10px;">
 
 ### Just 3 steps to get started:
   1) **Install [C++ SFML Library](https://www.sfml-dev.org/download.php).**

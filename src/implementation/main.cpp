@@ -38,7 +38,7 @@ int loop(sf::RenderWindow& window, std::map<std::string, float>& cfg)
 			if (x >= mWW)
 				x = x - mWW;
 			
-			agents.push_back(Agent(y, x, zer::athm::getAngleToPoint(y, x, mWH / 2, mWW / 2)));
+			agents.push_back(Agent(y, x, zer::athm::getAngleBetweenPoints(y, x, mWH / 2, mWW / 2)));
 			setPixelToPixmap(pixmap, mWW * y + x, sf::Color(255, 255, 255));
 		}
 
